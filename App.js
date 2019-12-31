@@ -4,6 +4,7 @@ import * as Permissions from 'expo-permissions';
 import { Camera } from "expo-camera";
 import styled from "styled-components";
 import { MaterialIcons } from "@expo/vector-icons";
+import * as FaceDetector from 'expo-face-detector';
 
 const {width, height} = Dimensions.get("window");
 
@@ -26,7 +27,8 @@ const IconBar = styled.View`
 export default class App extends React.Component {
   state = {
     hasPermisson: null,
-    cameraType: Camera.Constants.Type.front
+    cameraType: Camera.Constants.Type.front,
+    smileDetected: false
   };
 
   componentDidMount = async () => {
@@ -39,7 +41,7 @@ export default class App extends React.Component {
   };
 
   render(){
-    const { hasPermisson, cameraType } = this.state;
+    const { hasPermisson, cameraType, smileDetected } = this.state;
 
     if ( hasPermisson === true ){
       return (
@@ -52,6 +54,11 @@ export default class App extends React.Component {
               overflow: "hidden"
             }}
             type={cameraType}
+            onFacesDetected={smileDetected ? null : this.onFacesDetected}
+            faceDetectorSettings={{
+              detectLandmarks:FaceDetector.Constants.Landmarks.all,
+              runClassifications:FaceDetector.Constants.Classifications.all
+            }}
           />
           <IconBar>
             <TouchableOpacity onPress={this.switchCameraType}>
@@ -92,6 +99,18 @@ export default class App extends React.Component {
       this.setState({
         cameraType: Camera.Constants.Type.front
       })
+    }
+  }
+
+  onFacesDetected = ({faces}) => {
+    const face = faces[0];
+    if (face) {
+      if (face.smilingProbability > 0.8){
+        this.setState({
+          smileDetected: true
+        })
+        console.log("take Photo")
+      }
     }
   }
 }
