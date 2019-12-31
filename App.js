@@ -1,6 +1,6 @@
 import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
-import { Permissions } from "expo-permissions";
+import { StyleSheet, Text, View, ActivityIndicator } from 'react-native';
+import * as Permissions from 'expo-permissions';
 import { Camera } from "expo-camera";
 
 export default class App extends React.Component {
@@ -9,24 +9,31 @@ export default class App extends React.Component {
   };
 
   componentDidMount = async () => {
-    const { status } = await Permissions.getAsync(Permissions.CAMERA);
-    console.log(status);
+    const { status } = await Permissions.askAsync(Permissions.CAMERA);
+    if (status === "granted") {
+      this.setState({ hasPermisson: true });
+    } else {
+      this.setState({ hasPermisson: false });
+    }
   };
 
   render(){
-    return (
-      <View style={styles.container}>
-        <Text>Open up App.js to start working on your app!</Text>
-      </View>
-    );
+    const { hasPermisson } = this.state;
+
+    if ( hasPermisson === true ){
+      return (
+        <View>
+          <Text>This App has Camra Permissions</Text>
+        </View>
+      );
+    } else if ( hasPermisson === false ){
+      return (
+        <View>
+          <Text>This App hasn't Camra Permissions</Text>
+        </View>
+      );
+    } else {
+      return <ActivityIndicator/>
+    }
   }
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
