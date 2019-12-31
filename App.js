@@ -1,8 +1,9 @@
 import React from 'react';
-import { ActivityIndicator, Dimensions } from 'react-native';
+import { ActivityIndicator, Dimensions, TouchableOpacity } from 'react-native';
 import * as Permissions from 'expo-permissions';
 import { Camera } from "expo-camera";
 import styled from "styled-components";
+import { MaterialIcons } from "@expo/vector-icons";
 
 const {width, height} = Dimensions.get("window");
 
@@ -18,9 +19,14 @@ const Text = styled.Text`
   font-size:22px;
 `;
 
+const IconBar = styled.View`
+  margin-top:50px;
+`;
+
 export default class App extends React.Component {
   state = {
-    hasPermisson: null
+    hasPermisson: null,
+    cameraType: Camera.Constants.Type.front
   };
 
   componentDidMount = async () => {
@@ -33,7 +39,7 @@ export default class App extends React.Component {
   };
 
   render(){
-    const { hasPermisson } = this.state;
+    const { hasPermisson, cameraType } = this.state;
 
     if ( hasPermisson === true ){
       return (
@@ -45,8 +51,20 @@ export default class App extends React.Component {
               borderRadius: 15,
               overflow: "hidden"
             }}
-            type={Camera.Constants.Type.front}
+            type={cameraType}
           />
+          <IconBar>
+            <TouchableOpacity onPress={this.switchCameraType}>
+              <MaterialIcons 
+                name={
+                  cameraType === Camera.Constants.Type.front ? 
+                  "camera-front" : "camera-rear"
+                  }
+                color="white"
+                size={50}
+              />
+            </TouchableOpacity>
+          </IconBar>
         </CenterView>
       );
     } else if ( hasPermisson === false ){
@@ -61,6 +79,19 @@ export default class App extends React.Component {
           <ActivityIndicator/>
         </CenterView>
       );
+    }
+  }
+
+  switchCameraType = () => {
+    const { cameraType } = this.state;
+    if (cameraType === Camera.Constants.Type.front) {
+      this.setState({
+        cameraType: Camera.Constants.Type.back
+      })
+    } else {
+      this.setState({
+        cameraType: Camera.Constants.Type.front
+      })
     }
   }
 }
