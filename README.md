@@ -7,5 +7,7 @@
    - yarn add expo-permissions
  - Camera
    - yarn add expo-camera
+ - import * as MediaLibrary from 'expo-media-library';
+   - for save picture
 
 ## React Ref

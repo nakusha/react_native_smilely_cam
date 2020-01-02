@@ -1,13 +1,14 @@
 import React from 'react';
-import { ActivityIndicator, Dimensions, TouchableOpacity } from 'react-native';
+import { ActivityIndicator, Dimensions, TouchableOpacity, Platform } from 'react-native';
 import * as Permissions from 'expo-permissions';
 import { Camera } from "expo-camera";
 import styled from "styled-components";
 import { MaterialIcons } from "@expo/vector-icons";
 import * as FaceDetector from 'expo-face-detector';
-import {FileSystem} from 'expo';
+import * as MediaLibrary from 'expo-media-library';
 
 const {width, height} = Dimensions.get("window");
+const ALBUM_NAME = "Smiley Cam";
 
 const CenterView = styled.View`
   flex: 1;
@@ -132,13 +133,36 @@ export default class App extends React.Component {
       }
     }catch(error){
       alert(error);
-      this.setState({
-        smileDetected: false
-      })
+      setTimeout(() => {
+        this.setState({
+          smileDetected: false
+        })  
+      }, (2000));
+      
     }
   }
 
   savePhoto = async (uri) => {
+    try {
+      const { status } = await Permissions.askAsync(Permissions.CAMERA_ROLL);
+      if (status === "granted") {
+        const asset = await MediaLibrary.createAssetAsync(uri);
+        let album = await MediaLibrary.getAlbumAsync(ALBUM_NAME);
+        if (album === null) {
+          album = await MediaLibrary.createAlbumAsync(ALBUM_NAME, asset);
+        } else { 
+          await MediaLibrary.addAssetsToAlbumAsync([asset], album.id);
+        }
+        this.setState({
+          smileDetected: false
+        })
+      } else {
+        this.setState({hasPermisson: false});
+      }
+    }catch{
 
+    }finally{
+
+    }
   }
 }
